@@ -1,39 +1,39 @@
 package xmg
 
-import(
-    "log"
+import (
     "errors"
-    "io/ioutil"
-    "path/filepath"
+    "fmt"
     "github.com/veandco/go-sdl2/sdl"
     "github.com/veandco/go-sdl2/sdl_image"
     "github.com/veandco/go-sdl2/sdl_ttf"
+    "io/ioutil"
+    "log"
+    "path/filepath"
 )
-
 
 type Manager struct {
     ImageDirs []*ImgDir
-    FontDirs []*FontDir
+    FontDirs  []*FontDir
 }
 
 type ImgDir struct {
-    path string
+    path   string
     images map[string]*ImageResource
 }
 
 type FontDir struct {
-    path string
+    path  string
     fonts map[string]*FontResource
 }
 
 type ImageResource struct {
     Filename string
-    Handler *sdl.Surface
+    Surface  *sdl.Surface
 }
 
 type FontResource struct {
     Filename string
-    Handler *ttf.Font
+    Font     *ttf.Font
 }
 
 func NewManager(imgDirs []string, fontDirs []string) (*Manager, error) {
@@ -59,11 +59,10 @@ func NewManager(imgDirs []string, fontDirs []string) (*Manager, error) {
     }
 
     return &Manager{
-        ImageDirs: img_dirs,        
-        FontDirs: font_dirs,        
+        ImageDirs: img_dirs,
+        FontDirs:  font_dirs,
     }, nil
 }
-
 
 func NewImgDir(path string) (*ImgDir, error) {
     log.Printf("Initializing new image dir at path: %s", path)
@@ -81,7 +80,7 @@ func NewImgDir(path string) (*ImgDir, error) {
     }
 
     dir := &ImgDir{
-        path: path,
+        path:   path,
         images: images,
     }
 
@@ -102,10 +101,11 @@ func (id *ImgDir) List() {
 }
 
 func (id *ImgDir) LoadAndGet(filename string) (*ImageResource, error) {
+
     if ir, ok := id.images[filename]; ok {
         path := filepath.Join(id.path, filename)
         image, err := img.Load(path)
-        ir.Handler = image
+        ir.Surface = image
         return ir, err
     } else {
         return nil, errors.New("Entry dont exist")
@@ -118,12 +118,12 @@ func (id *ImgDir) Add(filename string) error {
     if ok, err := exists(fullpath); ok == false {
         return err
     }
-    
+
     id.images[filename] = &ImageResource{
         Filename: filename,
     }
 
-    log.Printf("Adding new image file entry at: %s", fullpath) 
+    log.Printf("Adding new image file entry at: %s", fullpath)
 
     return nil
 }
@@ -148,7 +148,7 @@ func NewFontDir(path string) (*FontDir, error) {
     }
 
     return &FontDir{
-        path: path,
+        path:  path,
         fonts: fonts,
     }, err
 }
@@ -161,11 +161,11 @@ func (fd *FontDir) List() {
 }
 
 func (fd *FontDir) LoadAndGet(filename string, size int) (*FontResource, error) {
-    
+
     if fr, ok := fd.fonts[filename]; ok {
         path := filepath.Join(fd.path, filename)
         font, err := ttf.OpenFont(path, size)
-        fr.Handler = font
+        fr.Font = font
 
         return fr, err
     } else {
@@ -188,4 +188,27 @@ func (fd *FontDir) Add(filename string) error {
     }
 
     return nil
+}
+
+func (man *Manager) GetSurface(str string) (*sdl.Surface, error) {
+    println("Entered get Surface")
+
+    for _, iDir := range man.ImageDirs {
+        println("searching at ", iDir.path)
+        r, err := iDir.LoadAndGet(str)
+
+        if r != nil && r.Surface != nil {
+            return r.Surface, err
+        }
+    }
+
+    msg := fmt.Sprintf("Couldnt find Surface %s, looked %d dirs.", str, len(man.ImageDirs))
+    log.Print(msg)
+    return nil, errors.New(msg)
+}
+
+func (man *Manager) GetFont(str string) (*ttf.Font, error) {
+    msg := fmt.Sprintf("Couldnt find Font %s, looked %d dirs.", str, len(man.ImageDirs))
+    log.Print(msg)
+    return nil, errors.New(msg)
 }
