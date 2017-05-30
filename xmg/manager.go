@@ -207,15 +207,15 @@ func (man *Manager) GetSurface(str string) (*sdl.Surface, error) {
     return nil, errors.New(msg)
 }
 
-func (man *Manager) GetFont(str string) (*ttf.Font, error) {
+func (man *Manager) GetFont(str string, size int) (*ttf.Font, error) {
     println("Entered get Font")
 
     for _, fDir := range man.FontDirs {
         println("searching at ", fDir.path)
-        r, err := fDir.LoadAndGet(str)
+        r, err := fDir.LoadAndGet(str, size)
 
-        if r != nil && r.Surface != nil {
-            return r.Surface, err
+        if r != nil && r.Font != nil {
+            return r.Font, err
         }
     }
 

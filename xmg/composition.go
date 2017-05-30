@@ -13,11 +13,12 @@ type Pos struct {
 }
 
 type TextEl struct {
-    FontStr string
-    font    *ttf.Font
-    Message string
-    Align   uint8
-    Pos     *Pos
+    FontStr  string
+    FontSize int
+    font     *ttf.Font
+    Message  string
+    Align    uint8
+    Pos      *Pos
 }
 
 type GfxEl struct {
@@ -31,6 +32,7 @@ type Composition struct {
     img      *sdl.Surface
     Gfx      []*GfxEl
     Text     []*TextEl
+    Loaded   bool
 }
 
 func (cmp *Composition) LoadResources(man *Manager) {
@@ -38,6 +40,8 @@ func (cmp *Composition) LoadResources(man *Manager) {
     surf, err := man.GetSurface(cmp.ImageStr)
     if err != nil {
         log.Printf("Coundnt load %s: \n\n %v", cmp.ImageStr, err)
+        cmp.Loaded = false
+        return
     }
 
     cmp.img = surf
@@ -47,16 +51,24 @@ func (cmp *Composition) LoadResources(man *Manager) {
         surf, err := man.GetSurface(gfx.GfxStr)
         if err != nil {
             log.Printf("%v", err)
+            cmp.Loaded = false
+
+            return
         }
         gfx.gfx = surf
     }
 
     for _, txt := range cmp.Text {
         println("Load font", txt.FontStr)
-        font, err := man.GetFont(txt.FontStr)
+        font, err := man.GetFont(txt.FontStr, txt.FontSize)
         if err != nil {
             log.Printf("%v", err)
+            cmp.Loaded = false
+
+            return
         }
         txt.font = font
     }
+
+    cmp.Loaded = true
 }

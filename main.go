@@ -20,8 +20,9 @@ func Test(man *xmg.Manager, rdr *sdl.Renderer) {
         },
         Text: []*xmg.TextEl{
             {
-                FontStr: "test.ttf",
-                Message: "Hello world!",
+                FontStr:  "test.ttf",
+                FontSize: 10,
+                Message:  "Hello world!",
                 Pos: &xmg.Pos{
                     X: 0,
                     Y: 0,
