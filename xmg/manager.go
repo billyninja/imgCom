@@ -208,6 +208,17 @@ func (man *Manager) GetSurface(str string) (*sdl.Surface, error) {
 }
 
 func (man *Manager) GetFont(str string) (*ttf.Font, error) {
+    println("Entered get Font")
+
+    for _, fDir := range man.FontDirs {
+        println("searching at ", fDir.path)
+        r, err := fDir.LoadAndGet(str)
+
+        if r != nil && r.Surface != nil {
+            return r.Surface, err
+        }
+    }
+
     msg := fmt.Sprintf("Couldnt find Font %s, looked %d dirs.", str, len(man.ImageDirs))
     log.Print(msg)
     return nil, errors.New(msg)
