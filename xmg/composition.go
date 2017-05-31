@@ -72,3 +72,11 @@ func (cmp *Composition) LoadResources(man *Manager) {
 
     cmp.Loaded = true
 }
+
+func (cmp *Composition) GetMainImage() *sdl.Surface {
+    if cmp.Loaded {
+        return nil
+    }
+
+    return cmp.img
+}
