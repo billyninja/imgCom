@@ -4,7 +4,7 @@ import (
     "github.com/billyninja/imgCom/xmg"
 )
 
-func Test(man *xmg.Manager) {
+func Test(sman *xmg.SurfaceManager, fman *xmg.FontManager) {
     cmp := &xmg.Composition{
         ImageStr: "strix-nebulosa.jpg",
         Gfx: []*xmg.GfxEl{
@@ -29,15 +29,12 @@ func Test(man *xmg.Manager) {
         },
     }
 
-    cmp.LoadResources(man)
     xmg.Render(cmp)
 }
 
 func main() {
-    man, _ := xmg.NewManager(
-        []string{"sample_media/images"},
-        []string{"sample_media/fonts"},
-    )
+    sman := xmg.NewSurfaceManager("sample_media/images", "")
+    fman := xmg.NewFontManager("sample_media/fonts", "Go-Regular.ttf")
 
-    Test(man)
+    Test(sman, fman)
 }

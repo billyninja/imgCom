@@ -33,7 +33,7 @@ func RenderGFX(r *sdl.Renderer, g *GfxEl) {
 
 func (t *TextEl) Bake(r *sdl.Renderer) *sdl.Surface {
     bkl := sdl.Color{0, 0, 0, 0}
-    font, err := ttf.OpenFont("sample_media/fonts/Go-Regular.ttf", 20)
+    font, err := ttf.OpenFont("sample_media/fonts/Go-Regular.ttf", t.FontSize)
     if err != nil {
         log.Printf("%v", err)
         os.Exit(2)
