@@ -16,10 +16,3 @@ func LoadImg(filename string) (*sdl.Surface, error) {
 
     return image, err
 }
-
-func GetRendererFromFilename(filename string) (*sdl.Surface, *sdl.Renderer, error) {
-    surfImg, err := LoadImg(filename)
-    rdr, err := GetRendererFromSurf(surfImg)
-
-    return surfImg, rdr, err
-}

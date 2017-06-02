@@ -1,35 +1,43 @@
 package xmg
 
-import (
-    "github.com/veandco/go-sdl2/sdl"
-    "github.com/veandco/go-sdl2/sdl_ttf"
-)
-
 type Pos struct {
-    X          int
-    Y          int
+    X          int32
+    Y          int32
     RelativeTo uint8
+}
+
+type Scale struct {
+    W int32
+    H int32
+}
+
+type Color struct {
+    R uint8
+    G uint8
+    B uint8
+    A uint8
 }
 
 type TextEl struct {
     FontStr  string
     FontSize int
-    font     *ttf.Font
     Message  string
+    Color    *Color
     Align    uint8
     Pos      *Pos
 }
 
 type GfxEl struct {
     GfxStr string
-    gfx    *sdl.Surface
     Pos    *Pos
+    Scale  *Scale
 }
 
 type Composition struct {
-    ImageStr string
-    img      *sdl.Surface
-    Gfx      []*GfxEl
-    Text     []*TextEl
-    Loaded   bool
+    MainImage  *GfxEl
+    BGColor    *Color
+    Dimensions *Scale
+    Gfx        []*GfxEl
+    Text       []*TextEl
+    Loaded     bool
 }
