@@ -1,5 +1,15 @@
 package xmg
 
+type ThumbDTMode uint8
+
+const (
+    Clean ThumbDTMode = 1 + iota
+    IncludeText
+    IncludeGFX
+    IncludeTextAndGfx
+    Full
+)
+
 type Pos struct {
     X          int32
     Y          int32
@@ -40,4 +50,10 @@ type Composition struct {
     Gfx        []*GfxEl
     Text       []*TextEl
     Loaded     bool
+    Thumbfy    *Thumbfy
+}
+
+type Thumbfy struct {
+    Spec       string
+    DetailMode ThumbDTMode
 }

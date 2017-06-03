@@ -15,6 +15,7 @@ var (
 )
 
 type SurfaceManager struct {
+    BasePath  string
     Resources map[string]*sdl.Surface
 }
 
@@ -24,6 +25,7 @@ type FontManager struct {
 
 func NewSurfaceManager(image_dir, fallback string) *SurfaceManager {
     m := &SurfaceManager{
+        BasePath:  image_dir,
         Resources: make(map[string]*sdl.Surface),
     }
 
@@ -38,18 +40,24 @@ func NewSurfaceManager(image_dir, fallback string) *SurfaceManager {
 }
 
 func (m *SurfaceManager) Load(resource string) (*sdl.Surface, error) {
+    resource = filepath.Join(m.BasePath, resource)
     surf, ok := m.Resources[resource]
     if !ok {
         return nil, image_not_found
     }
 
     if ok && surf != nil {
+        println("Hit")
         return surf, nil
     }
 
+    println("miss")
     s, err := img.Load(resource)
     if err != nil {
         delete(m.Resources, resource)
+    } else {
+        println("stored ", resource)
+        m.Resources[resource] = s
     }
 
     return s, err
@@ -67,6 +75,7 @@ func (m *SurfaceManager) List() []string {
 }
 
 func NewFontManager(image_dir, fallback string) *FontManager {
+    ttf.Init()
     m := &FontManager{
         Resources: make(map[string]map[int]*ttf.Font),
     }

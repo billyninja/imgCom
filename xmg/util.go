@@ -1,6 +1,9 @@
 package xmg
 
-import "os"
+import (
+    "os"
+    "path/filepath"
+)
 
 func exists(path string) (bool, error) {
     _, err := os.Stat(path)
@@ -14,6 +17,10 @@ func exists(path string) (bool, error) {
 }
 
 func IsImgFile(path string) bool {
+    switch filepath.Ext(path) {
+    case ".jpg", ".png", ".gif", ".bmp", ".jpeg":
+        return true
+    }
     return false
 }
 
