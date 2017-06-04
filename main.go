@@ -17,6 +17,9 @@ func Test(sman *xmg.SurfaceManager, fman *xmg.FontManager) {
             },
             Pos: &xmg.Pos{X: 100, Y: 100},
         },
+        Thumbfy: &xmg.Thumbfy{
+            Spec: "52x",
+        },
         Dimensions: &xmg.Scale{
             W: 800,
             H: 600,

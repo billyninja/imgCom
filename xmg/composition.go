@@ -54,6 +54,5 @@ type Composition struct {
 }
 
 type Thumbfy struct {
-    Spec       string
-    DetailMode ThumbDTMode
+    Spec string
 }

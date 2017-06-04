@@ -5,6 +5,8 @@ import (
     "github.com/veandco/go-sdl2/sdl_image"
     "github.com/veandco/go-sdl2/sdl_ttf"
     "os"
+    "regexp"
+    "strconv"
 )
 
 func RenderGFX(r *sdl.Renderer, g *GfxEl, sman *SurfaceManager) {
@@ -29,7 +31,7 @@ func RenderGFX(r *sdl.Renderer, g *GfxEl, sman *SurfaceManager) {
     }
 
     if should_scale {
-        s, _ = sdl.CreateRGBSurface(0, w, h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000)
+        s, _ = createBlankSurface(w, h)
         defer s.Free()
         gs.BlitScaled(nil, s, &sdl.Rect{0, 0, w, h})
     } else {
@@ -81,7 +83,7 @@ func Render(cmp *Composition, sman *SurfaceManager, fman *FontManager) *sdl.Surf
     )
 
     rct := &sdl.Rect{0, 0, cmp.Dimensions.W, cmp.Dimensions.H}
-    s, _ = sdl.CreateRGBSurface(0, rct.W, rct.H, 24, 0, 0, 0, 0)
+    s, _ = createBlankSurface(rct.W, rct.H)
     r, _ = sdl.CreateSoftwareRenderer(s)
     if cmp.BGColor != nil {
         println("bgcolor", cmp.BGColor.R, cmp.BGColor.G, cmp.BGColor.B, cmp.BGColor.A)
@@ -103,7 +105,64 @@ func Render(cmp *Composition, sman *SurfaceManager, fman *FontManager) *sdl.Surf
         RenderText(r, t, fman)
     }
 
+    RenderThumb(cmp, s)
+
     return s
+}
+
+func createBlankSurface(w, h int32) (*sdl.Surface, error) {
+    return sdl.CreateRGBSurface(0, w, h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000)
+}
+
+func RenderThumb(cmp *Composition, s *sdl.Surface) *sdl.Surface {
+    var w, h int32
+    spc := cmp.Thumbfy.Spec
+
+    // Todo, send to a global init
+    var validSpec = regexp.MustCompile(`([0-9]+)?x([0-9]+)?`)
+
+    res := validSpec.FindAllStringSubmatch(spc, 2)
+    if len(res) == 0 {
+        println("Invalid thumb format: ", spc)
+        os.Exit(2)
+    }
+
+    w64, err := strconv.ParseInt(string(res[0][1]), 10, 32)
+    if err == nil {
+        w = int32(w64)
+    }
+
+    h64, err := strconv.ParseInt(string(res[0][2]), 10, 32)
+    if err == nil {
+        h = int32(h64)
+    }
+
+    findAR := func(sw, sh int32) float32 {
+        if s.W >= s.H {
+            return float32(s.H) / float32(s.W)
+        } else {
+            return float32(s.W) / float32(s.H)
+        }
+
+        return 1
+    }
+
+    if h == 0 {
+        h = int32(findAR(s.W, s.H) * float32(w))
+        println(h)
+    }
+
+    if w == 0 {
+        w = int32(findAR(s.W, s.H) * float32(h))
+    }
+
+    println(w, h)
+
+    st, _ := createBlankSurface(w, h)
+    s.BlitScaled(nil, st, &sdl.Rect{0, 0, w, h})
+
+    Save("out/thumb.png", st)
+    return st
 }
 
 func Save(filename string, s *sdl.Surface) error {
