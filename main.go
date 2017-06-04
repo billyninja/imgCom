@@ -7,7 +7,7 @@ import (
     "time"
 )
 
-func Test(sman *xmg.SurfaceManager, fman *xmg.FontManager) {
+func Test(man *xmg.Manager) {
     cmp := &xmg.Composition{
         MainImage: &xmg.GfxEl{
             GfxStr: "strix-nebulosa.jpg",
@@ -60,21 +60,23 @@ func Test(sman *xmg.SurfaceManager, fman *xmg.FontManager) {
             },
         },
     }
-    var surf *sdl.Surface
-    for i := 0; i < 10; i++ {
+    var (
+        surf *sdl.Surface
+        err  error
+    )
+    for i := 0; i < 1; i++ {
         t1 := time.Now()
-        surf = xmg.Render(cmp, sman, fman)
-        fmt.Printf("lap %d: %v\n", i+1, time.Since(t1).Seconds())
+        surf, err = man.Render(cmp)
+        fmt.Printf("lap %d: %v err: %v\n", i+1, time.Since(t1).Seconds(), err)
     }
-    filename := fmt.Sprintf("out/xmg-%s_%s", time.Now().Format("02012006T150405"), cmp.MainImage.GfxStr)
+    filename := fmt.Sprintf("xmg-%s_%s", time.Now().Format("02012006T150405"), cmp.MainImage.GfxStr)
 
-    xmg.Save(filename, surf)
+    man.Save(surf, filename)
 }
 
 func main() {
     t1 := time.Now()
-    sman := xmg.NewSurfaceManager("sample_media/images", "")
-    fman := xmg.NewFontManager("sample_media/fonts", "Go-Regular.ttf")
-    Test(sman, fman)
+    man := xmg.NewManager("sample_media/images", "sample_media/fonts", "out")
+    Test(man)
     fmt.Printf("%v\n", time.Since(t1).Seconds())
 }

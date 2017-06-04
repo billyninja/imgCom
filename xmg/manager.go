@@ -14,7 +14,13 @@ var (
     font_not_found  error = errors.New("font not found!")
 )
 
-type SurfaceManager struct {
+type Manager struct {
+    Images *ImageManager
+    Fonts  *FontManager
+    Out    string
+}
+
+type ImageManager struct {
     BasePath  string
     Resources map[string]*sdl.Surface
 }
@@ -25,8 +31,8 @@ type FontManager struct {
     Resources map[string]map[int]*ttf.Font
 }
 
-func NewSurfaceManager(image_dir, fallback string) *SurfaceManager {
-    m := &SurfaceManager{
+func NewImageManager(image_dir, fallback string) *ImageManager {
+    m := &ImageManager{
         BasePath:  image_dir,
         Resources: make(map[string]*sdl.Surface),
     }
@@ -41,7 +47,7 @@ func NewSurfaceManager(image_dir, fallback string) *SurfaceManager {
     return m
 }
 
-func (m *SurfaceManager) Load(resource string) (*sdl.Surface, error) {
+func (m *ImageManager) Load(resource string) (*sdl.Surface, error) {
     resource = filepath.Join(m.BasePath, resource)
     surf, ok := m.Resources[resource]
     if !ok {
@@ -65,7 +71,7 @@ func (m *SurfaceManager) Load(resource string) (*sdl.Surface, error) {
     return s, err
 }
 
-func (m *SurfaceManager) List() []string {
+func (m *ImageManager) List() []string {
     out := make([]string, len(m.Resources))
     i := 0
     for k := range m.Resources {
@@ -137,4 +143,35 @@ func (m *FontManager) List() []string {
     }
 
     return out
+}
+
+func NewManager(image_dir, font_dir, output_dir string) *Manager {
+    return &Manager{
+        Images: NewImageManager(image_dir, ""),
+        Fonts:  NewFontManager(font_dir, "Go-Regular.ttf"),
+        Out:    output_dir,
+    }
+}
+
+func (m *Manager) Render(cmp *Composition) (*sdl.Surface, error) {
+    return render(cmp, m.Images, m.Fonts)
+}
+
+func (m *Manager) RenderAndSave(cmp *Composition, filename string) (*sdl.Surface, error) {
+    s, err := render(cmp, m.Images, m.Fonts)
+    if err != nil {
+        return nil, err
+    }
+    err = m.Save(s, filename)
+
+    return s, err
+}
+
+func (m *Manager) RenderThumb(cmp *Composition, s *sdl.Surface) (*sdl.Surface, error) {
+    return renderThumb(cmp, s)
+}
+
+func (m *Manager) Save(surf *sdl.Surface, filename string) error {
+    filename = filepath.Join(m.Out, filename)
+    return img.SavePNG(surf, filename)
 }
