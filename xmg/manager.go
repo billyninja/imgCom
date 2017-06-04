@@ -20,6 +20,7 @@ type SurfaceManager struct {
 }
 
 type FontManager struct {
+    BasePath  string
     Resources map[string]map[int]*ttf.Font
 }
 
@@ -74,13 +75,14 @@ func (m *SurfaceManager) List() []string {
     return out
 }
 
-func NewFontManager(image_dir, fallback string) *FontManager {
+func NewFontManager(font_dir, fallback string) *FontManager {
     ttf.Init()
     m := &FontManager{
         Resources: make(map[string]map[int]*ttf.Font),
+        BasePath:  font_dir,
     }
 
-    filepath.Walk(image_dir, func(p string, i os.FileInfo, e error) error {
+    filepath.Walk(font_dir, func(p string, i os.FileInfo, e error) error {
         if IsFontFile(p) {
             m.Resources[p] = make(map[int]*ttf.Font)
         }
@@ -91,14 +93,19 @@ func NewFontManager(image_dir, fallback string) *FontManager {
 }
 
 func (m *FontManager) Load(resource string, size int) (*ttf.Font, error) {
+    resource = filepath.Join(m.BasePath, resource)
     size_map, ok := m.Resources[resource]
     if !ok {
+        println("Font resource miss!", resource)
         return nil, font_not_found
     }
 
     if ok {
+        println("Font resource hit!")
+
         font, ok2 := size_map[size]
         if !ok2 {
+            println("Font size miss!")
             f, err := ttf.OpenFont(resource, size)
             if err != nil {
                 delete(m.Resources, resource)
@@ -107,6 +114,7 @@ func (m *FontManager) Load(resource string, size int) (*ttf.Font, error) {
             }
             return f, err
         } else {
+            println("Font size hit!")
             return font, nil
         }
     }

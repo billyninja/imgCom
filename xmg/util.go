@@ -25,5 +25,5 @@ func IsImgFile(path string) bool {
 }
 
 func IsFontFile(path string) bool {
-    return false
+    return filepath.Ext(path) == ".ttf"
 }

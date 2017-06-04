@@ -4,7 +4,6 @@ import (
     "github.com/veandco/go-sdl2/sdl"
     "github.com/veandco/go-sdl2/sdl_image"
     "github.com/veandco/go-sdl2/sdl_ttf"
-    "log"
     "os"
 )
 
@@ -51,24 +50,22 @@ func RenderGFX(r *sdl.Renderer, g *GfxEl, sman *SurfaceManager) {
     )
 }
 
-func (t *TextEl) Bake(r *sdl.Renderer) *sdl.Surface {
+func (t *TextEl) Bake(r *sdl.Renderer, f *ttf.Font) *sdl.Surface {
     color := sdl.Color{}
     if t.Color != nil {
         color = sdl.Color{t.Color.R, t.Color.G, t.Color.B, t.Color.A}
     }
+    ts, _ := f.RenderUTF8_Blended(t.Message, color)
 
-    font, err := ttf.OpenFont("sample_media/fonts/Go-Regular.ttf", t.FontSize)
-    if err != nil {
-        log.Printf("%v", err)
-        os.Exit(2)
-    }
-
-    ts, _ := font.RenderUTF8_Blended(t.Message, color)
     return ts
 }
 
 func RenderText(r *sdl.Renderer, t *TextEl, fman *FontManager) {
-    ts := t.Bake(r)
+    f, err := fman.Load(t.FontStr, t.FontSize)
+    if err != nil {
+        os.Exit(2)
+    }
+    ts := t.Bake(r, f)
     tt, _ := r.CreateTextureFromSurface(ts)
     r.Copy(
         tt,
