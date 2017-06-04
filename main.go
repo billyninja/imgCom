@@ -49,7 +49,7 @@ func Test(sman *xmg.SurfaceManager, fman *xmg.FontManager) {
         },
         Text: []*xmg.TextEl{
             {
-                FontStr:  "Go-Regular.ttf",
+                FontStr:  "test.ttf",
                 FontSize: 16,
                 Message:  "Hello world!",
                 Color:    &xmg.Color{255, 255, 255, 255},

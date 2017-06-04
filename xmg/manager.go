@@ -21,6 +21,7 @@ type SurfaceManager struct {
 
 type FontManager struct {
     BasePath  string
+    Fallback  string
     Resources map[string]map[int]*ttf.Font
 }
 
@@ -80,6 +81,7 @@ func NewFontManager(font_dir, fallback string) *FontManager {
     m := &FontManager{
         Resources: make(map[string]map[int]*ttf.Font),
         BasePath:  font_dir,
+        Fallback:  fallback,
     }
 
     filepath.Walk(font_dir, func(p string, i os.FileInfo, e error) error {
@@ -97,6 +99,10 @@ func (m *FontManager) Load(resource string, size int) (*ttf.Font, error) {
     size_map, ok := m.Resources[resource]
     if !ok {
         println("Font resource miss!", resource)
+        if len(m.Fallback) > 0 {
+            println("Going for the callback!", m.Fallback)
+            return m.Load(m.Fallback, size)
+        }
         return nil, font_not_found
     }
 
