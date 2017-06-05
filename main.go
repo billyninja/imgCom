@@ -46,6 +46,17 @@ func Test(man *xmg.Manager) {
                     Y: 0,
                 },
             },
+            {
+                GfxStr: "trophy.png",
+                Scale: &xmg.Scale{
+                    W: 24,
+                    H: 24,
+                },
+                Pos: &xmg.Pos{
+                    X: 0,
+                    Y: 0,
+                },
+            },
         },
         Text: []*xmg.TextEl{
             {
@@ -69,9 +80,10 @@ func Test(man *xmg.Manager) {
         surf, err = man.Render(cmp)
         fmt.Printf("lap %d: %v err: %v\n", i+1, time.Since(t1).Seconds(), err)
     }
-    filename := fmt.Sprintf("xmg-%s_%s", time.Now().Format("02012006T150405"), cmp.MainImage.GfxStr)
 
+    filename := fmt.Sprintf("xmg-%s_%s.png", time.Now().Format("02012006T150405"), cmp.MainImage.GfxStr)
     man.Save(surf, filename)
+
 }
 
 func main() {

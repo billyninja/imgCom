@@ -55,11 +55,9 @@ func (m *ImageManager) Load(resource string) (*sdl.Surface, error) {
     }
 
     if ok && surf != nil {
-        println("Hit")
         return surf, nil
     }
 
-    println("miss")
     s, err := img.Load(resource)
     if err != nil {
         delete(m.Resources, resource)
@@ -104,7 +102,6 @@ func (m *FontManager) Load(resource string, size int) (*ttf.Font, error) {
     resource = filepath.Join(m.BasePath, resource)
     size_map, ok := m.Resources[resource]
     if !ok {
-        println("Font resource miss!", resource)
         if len(m.Fallback) > 0 {
             println("Going for the callback!", m.Fallback)
             return m.Load(m.Fallback, size)
@@ -113,15 +110,15 @@ func (m *FontManager) Load(resource string, size int) (*ttf.Font, error) {
     }
 
     if ok {
-        println("Font resource hit!")
-
         font, ok2 := size_map[size]
         if !ok2 {
             println("Font size miss!")
             f, err := ttf.OpenFont(resource, size)
             if err != nil {
+                println("ERR deleting entry: ", resource)
                 delete(m.Resources, resource)
             } else {
+                println("new size entry for: ", resource, size)
                 size_map[size] = f
             }
             return f, err

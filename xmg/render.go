@@ -5,12 +5,11 @@ import (
     "fmt"
     "github.com/veandco/go-sdl2/sdl"
     "github.com/veandco/go-sdl2/sdl_ttf"
-    "os"
     "regexp"
     "strconv"
 )
 
-func RenderGFX(r *sdl.Renderer, g *GfxEl, sman *ImageManager) {
+func renderGFX(r *sdl.Renderer, g *GfxEl, sman *ImageManager) error {
     var (
         w, h, x, y   int32
         should_scale bool
@@ -19,7 +18,7 @@ func RenderGFX(r *sdl.Renderer, g *GfxEl, sman *ImageManager) {
 
     gs, err := sman.Load(g.GfxStr)
     if err != nil {
-        os.Exit(2)
+        return err
     }
     if g.Scale != nil {
         should_scale = true
@@ -32,13 +31,13 @@ func RenderGFX(r *sdl.Renderer, g *GfxEl, sman *ImageManager) {
     }
 
     if should_scale {
-        s, _ = createBlankSurface(w, h)
+        s, err = createBlankSurface(w, h)
         defer s.Free()
         gs.BlitScaled(nil, s, &sdl.Rect{0, 0, w, h})
     } else {
         s = gs
     }
-    gt, _ := r.CreateTextureFromSurface(s)
+    gt, err := r.CreateTextureFromSurface(s)
     defer gt.Destroy()
 
     if g.Pos != nil {
@@ -51,30 +50,38 @@ func RenderGFX(r *sdl.Renderer, g *GfxEl, sman *ImageManager) {
         &sdl.Rect{0, 0, w, h},
         &sdl.Rect{x, y, w, h},
     )
+
+    return err
 }
 
-func (t *TextEl) Bake(r *sdl.Renderer, f *ttf.Font) *sdl.Surface {
+func (t *TextEl) bake(r *sdl.Renderer, f *ttf.Font) (*sdl.Surface, error) {
     color := sdl.Color{}
     if t.Color != nil {
         color = sdl.Color{t.Color.R, t.Color.G, t.Color.B, t.Color.A}
     }
-    ts, _ := f.RenderUTF8_Blended(t.Message, color)
+    ts, err := f.RenderUTF8_Blended(t.Message, color)
 
-    return ts
+    return ts, err
 }
 
-func RenderText(r *sdl.Renderer, t *TextEl, fman *FontManager) {
+func renderText(r *sdl.Renderer, t *TextEl, fman *FontManager) error {
     f, err := fman.Load(t.FontStr, t.FontSize)
     if err != nil {
-        os.Exit(2)
+        return err
     }
-    ts := t.Bake(r, f)
-    tt, _ := r.CreateTextureFromSurface(ts)
+
+    ts, err := t.bake(r, f)
+    tt, err := r.CreateTextureFromSurface(ts)
+    if err != nil {
+        return err
+    }
     r.Copy(
         tt,
         &sdl.Rect{0, 0, ts.W, ts.H},
         &sdl.Rect{t.Pos.X, t.Pos.Y, ts.W, ts.H},
     )
+
+    return err
 }
 
 func render(cmp *Composition, sman *ImageManager, fman *FontManager) (*sdl.Surface, error) {
@@ -94,15 +101,15 @@ func render(cmp *Composition, sman *ImageManager, fman *FontManager) (*sdl.Surfa
         if cmp.MainImage.Scale == nil {
             cmp.MainImage.Scale = &Scale{rct.W, rct.H}
         }
-        RenderGFX(r, cmp.MainImage, sman)
+        err = renderGFX(r, cmp.MainImage, sman)
     }
 
     for _, g := range cmp.Gfx {
-        RenderGFX(r, g, sman)
+        err = renderGFX(r, g, sman)
     }
 
     for _, t := range cmp.Text {
-        RenderText(r, t, fman)
+        err = renderText(r, t, fman)
     }
 
     return s, err
